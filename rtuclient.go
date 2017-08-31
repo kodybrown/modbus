@@ -41,7 +41,7 @@ func RTUClient(address string) Client {
 
 // rtuPackager implements Packager interface.
 type rtuPackager struct {
-	SlaveId byte
+	SlaveID uint16
 }
 
 // Encode encodes PDU in a RTU frame:
@@ -49,7 +49,11 @@ type rtuPackager struct {
 //  Function        : 1 byte
 //  Data            : 0 up to 252 bytes
 //  CRC             : 2 byte
-func (mb *rtuPackager) Encode(pdu *ProtocolDataUnit) (adu []byte, err error) {
+func (mb *rtuPackager) Encode(slaveID uint16, pdu *ProtocolDataUnit) (adu []byte, err error) {
+	if slaveID > 255 {
+		return nil, fmt.Errorf("invalid slave id: %d", slaveID)
+	}
+
 	length := len(pdu.Data) + 4
 	if length > rtuMaxSize {
 		err = fmt.Errorf("modbus: length of data '%v' must not be bigger than '%v'", length, rtuMaxSize)
@@ -57,7 +61,7 @@ func (mb *rtuPackager) Encode(pdu *ProtocolDataUnit) (adu []byte, err error) {
 	}
 	adu = make([]byte, length)
 
-	adu[0] = mb.SlaveId
+	adu[0] = byte(slaveID)
 	adu[1] = pdu.FunctionCode
 	copy(adu[2:], pdu.Data)
 

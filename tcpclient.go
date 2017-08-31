@@ -52,7 +52,7 @@ type tcpPackager struct {
 	// For synchronization between messages of server & client
 	transactionId uint32
 	// Broadcast address is 0
-	SlaveId byte
+	SlaveID uint16
 }
 
 // Encode adds modbus application protocol header:
@@ -62,7 +62,11 @@ type tcpPackager struct {
 //  Unit identifier: 1 byte
 //  Function code: 1 byte
 //  Data: n bytes
-func (mb *tcpPackager) Encode(pdu *ProtocolDataUnit) (adu []byte, err error) {
+func (mb *tcpPackager) Encode(slaveID uint16, pdu *ProtocolDataUnit) (adu []byte, err error) {
+	if slaveID > 255 {
+		return nil, fmt.Errorf("invalid slave id: %d", slaveID)
+	}
+
 	adu = make([]byte, tcpHeaderSize+1+len(pdu.Data))
 
 	// Transaction identifier
@@ -70,11 +74,11 @@ func (mb *tcpPackager) Encode(pdu *ProtocolDataUnit) (adu []byte, err error) {
 	binary.BigEndian.PutUint16(adu, uint16(transactionId))
 	// Protocol identifier
 	binary.BigEndian.PutUint16(adu[2:], tcpProtocolIdentifier)
-	// Length = sizeof(SlaveId) + sizeof(FunctionCode) + Data
+	// Length = sizeof(SlaveID) + sizeof(FunctionCode) + Data
 	length := uint16(1 + 1 + len(pdu.Data))
 	binary.BigEndian.PutUint16(adu[4:], length)
 	// Unit identifier
-	adu[6] = mb.SlaveId
+	adu[6] = byte(slaveID)
 
 	// PDU
 	adu[tcpHeaderSize] = pdu.FunctionCode
