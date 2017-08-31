@@ -441,7 +441,6 @@ func (mb *client) ReadFIFOQueue(slaveID uint16, address uint16) (results []byte,
 // Helpers
 
 func (mb *client) sendWithRetry(slaveID uint16, request *ProtocolDataUnit) (response *ProtocolDataUnit, err error) {
-	// fmt.Println("ReadHoldingRegisters() send()")
 	attempt := 1
 	for {
 		response, err = mb.send(slaveID, request)
