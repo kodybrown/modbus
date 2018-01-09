@@ -216,6 +216,8 @@ func (mb *client) WriteSingleRegister(slaveID uint16, address, value uint16) (re
 	}
 	response, err := mb.sendWithRetry(slaveID, &request)
 	if err != nil {
+		// fmt.Println(request)
+		// fmt.Println(response)
 		return
 	}
 	// Fixed response length
@@ -298,8 +300,12 @@ func (mb *client) WriteMultipleRegisters(slaveID uint16, address, quantity uint1
 		FunctionCode: FuncCodeWriteMultipleRegisters,
 		Data:         dataBlockSuffix(value, address, quantity),
 	}
+	// fmt.Printf("WriteMultipleRegisters().request:  %v\n", request)
 	response, err := mb.sendWithRetry(slaveID, &request)
 	if err != nil {
+		// fmt.Println("WriteMultipleRegisters()")
+		// fmt.Printf("Request:  %v\n", request)
+		// fmt.Printf("Response: %v\n", response)
 		return
 	}
 	// Fixed response length
@@ -442,9 +448,11 @@ func (mb *client) ReadFIFOQueue(slaveID uint16, address uint16) (results []byte,
 
 func (mb *client) sendWithRetry(slaveID uint16, request *ProtocolDataUnit) (response *ProtocolDataUnit, err error) {
 	attempt := 1
+	// fmt.Printf("sendWithRetry().request:  %v\n", request)
 	for {
 		response, err = mb.send(slaveID, request)
 		if err != nil {
+			// fmt.Printf("sendWithRetry() ** response: %v\n", response)
 			if attempt > _MAX_ATTEMPTS {
 				return
 			}
@@ -460,29 +468,40 @@ func (mb *client) sendWithRetry(slaveID uint16, request *ProtocolDataUnit) (resp
 
 // send sends request and checks possible exception in the response.
 func (mb *client) send(slaveID uint16, request *ProtocolDataUnit) (response *ProtocolDataUnit, err error) {
+	// fmt.Printf("send().request:  %v\n", request)
 	aduRequest, err := mb.packager.Encode(slaveID, request)
 	if err != nil {
+		fmt.Printf("send().Encode() failed.\n%s: %v\n", err.Error(), err)
 		return
 	}
+
+	// fmt.Printf("send().aduRequest:  %v\n", aduRequest)
 	aduResponse, err := mb.transporter.Send(aduRequest)
 	if err != nil {
+		fmt.Printf("send().transporter.Send() failed: %v, %v, %v.\n%s: %v\n", slaveID, request, aduRequest, err.Error(), err)
 		return
 	}
+	// fmt.Printf("send().aduResponse:  %v\n", aduResponse)
 	if err = mb.packager.Verify(aduRequest, aduResponse); err != nil {
+		fmt.Printf("send().packager.Verify() failed.\n%s: %v\n", err.Error(), err)
 		return
 	}
 	response, err = mb.packager.Decode(aduResponse)
 	if err != nil {
+		fmt.Printf("send().packager.Decode() failed.\n%s: %v\n", err.Error(), err)
 		return
 	}
+	// fmt.Printf("send().response:  %v\n", response)
 	// Check correct function code returned (exception)
 	if response.FunctionCode != request.FunctionCode {
 		err = responseError(response)
+		fmt.Printf("send().response.FunctionCode != request.FunctionCode.\n%s: %v\n", err.Error(), err)
 		return
 	}
 	if response.Data == nil || len(response.Data) == 0 {
 		// Empty response
 		err = fmt.Errorf("modbus: response data is empty")
+		fmt.Printf("response.Data == nil || len(response.Data) == 0.\n%s: %v\n", err.Error(), err)
 		return
 	}
 	return

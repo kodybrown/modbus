@@ -13,14 +13,7 @@ func ConvertBytesToUint16(rawResults []byte, byteOrder binary.ByteOrder) (result
 	results = []uint16{}
 	err = nil
 
-	count := int(rawResults[0])
-	rawResults = rawResults[1:]
-
-	if count != len(rawResults) {
-		return nil, fmt.Errorf("ConvertBytesToUint16(): data size mismatch")
-	}
-
-	for i := 0; i < count; i += 2 {
+	for i := 0; i < len(rawResults); i += 2 {
 		//data, decodeErr := DecodeHiLoUInt16(order, rawResults[sliceStart:sliceStop + 1])
 		buf := bytes.NewReader(rawResults[i : i+2])
 		err = binary.Read(buf, byteOrder, &data)
@@ -41,14 +34,7 @@ func ConvertBytesToUint32(rawResults []byte, byteOrder binary.ByteOrder) (result
 	results = []uint32{}
 	err = nil
 
-	count := int(rawResults[0])
-	rawResults = rawResults[1:]
-
-	if count != len(rawResults) {
-		return nil, fmt.Errorf("ConvertBytesToUint32(): data size mismatch")
-	}
-
-	for i := 0; i < count; i += 4 {
+	for i := 0; i < len(rawResults); i += 4 {
 		//data, decodeErr := DecodeHiLoUInt16(order, rawResults[sliceStart:sliceStop + 1])
 		buf := bytes.NewReader(rawResults[i : i+4])
 		err = binary.Read(buf, byteOrder, &data)
@@ -69,14 +55,7 @@ func ConvertBytesToInt16(rawResults []byte, byteOrder binary.ByteOrder) (results
 	results = []int16{}
 	err = nil
 
-	count := int(rawResults[0])
-	rawResults = rawResults[1:]
-
-	if count != len(rawResults) {
-		return nil, fmt.Errorf("ConvertBytesToInt16(): data size mismatch")
-	}
-
-	for i := 0; i < count; i += 2 {
+	for i := 0; i < len(rawResults); i += 2 {
 		//data, decodeErr := DecodeHiLoUInt16(order, rawResults[sliceStart:sliceStop + 1])
 		buf := bytes.NewReader(rawResults[i : i+2])
 		err = binary.Read(buf, byteOrder, &data)
@@ -97,14 +76,7 @@ func ConvertBytesToInt32(rawResults []byte, byteOrder binary.ByteOrder) (results
 	results = []int32{}
 	err = nil
 
-	count := int(rawResults[0])
-	rawResults = rawResults[1:]
-
-	if count != len(rawResults) {
-		return nil, fmt.Errorf("ConvertBytesToInt32(): data size mismatch")
-	}
-
-	for i := 0; i < count; i += 4 {
+	for i := 0; i < len(rawResults); i += 4 {
 		//data, decodeErr := DecodeHiLoUInt32(order, rawResults[sliceStart:sliceStop + 1])
 		buf := bytes.NewReader(rawResults[i : i+4])
 		err = binary.Read(buf, byteOrder, &data)
@@ -125,14 +97,7 @@ func ConvertBytesToFloat32(rawResults []byte, byteOrder binary.ByteOrder) (resul
 	results = []float32{}
 	err = nil
 
-	count := int(rawResults[0])
-	rawResults = rawResults[1:]
-
-	if count != len(rawResults) {
-		return nil, fmt.Errorf("ConvertBytesToFloat32(): data size mismatch")
-	}
-
-	for i := 0; i < count; i += 4 {
+	for i := 0; i < len(rawResults); i += 4 {
 		//data, decodeErr := DecodeHiLoUFloat32(order, rawResults[sliceStart:sliceStop + 1])
 		buf := bytes.NewReader(rawResults[i : i+4])
 		err = binary.Read(buf, byteOrder, &data)
